@@ -2,7 +2,6 @@
   "defaultSchema": "dataform",
   "assertionSchema": "dataform_assertions",
   "warehouse": "bigquery",
-  "defaultDatabase": "gcp-a11y-test-project",
+  "defaultDatabase": "mindful-furnace-217100",
   "defaultLocation": "US"
 }
-    
