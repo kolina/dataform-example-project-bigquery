@@ -14,12 +14,7 @@ steps:
       
       echo "Target API Endpoint: $${API_ENDPOINT}"
       echo "Compiling from: $${RELEASE_CONFIG_RESOURCE}"
-      
-      if; then
-        echo "ERROR: Failed to get token."
-        exit 1
-      fi
-      
+
       # 3. Construct the JSON payload
       # This payload is the core of the request, telling the API to use the
       # 'releaseConfig' as the source for the new compilation.
