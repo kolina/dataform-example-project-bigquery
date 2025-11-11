@@ -1,0 +1,52 @@
+steps:
+- name: 'gcr.io/cloud-builders/gcloud'
+  id: 'Create Dataform Compilation Result from Release Config'
+  entrypoint: 'bash'
+  args:
+    - '-c'
+    - |
+      echo "Starting Dataform compilation trigger for Release Config: ${_RELEASE_CONFIG_ID}"
+      
+      # 1. Construct the full resource names
+      RELEASE_CONFIG_RESOURCE="projects/${_DATAFORM_PROJECT_ID}/locations/${_DATAFORM_REGION}/repositories/${_DATAFORM_REPO_ID}/releaseConfigs/${_RELEASE_CONFIG_ID}"
+      DATAFORM_PARENT="projects/${_DATAFORM_PROJECT_ID}/locations/${_DATAFORM_REGION}/repositories/${_DATAFORM_REPO_ID}"
+      API_ENDPOINT="https://dataform.googleapis.com/v1/${DATAFORM_PARENT}/compilationResults"
+      
+      echo "Target API Endpoint: ${API_ENDPOINT}"
+      echo "Compiling from: ${RELEASE_CONFIG_RESOURCE}"
+      
+      # 2. Get a short-lived access token by impersonating the 'Actor' SA
+      # This command relies on the 'Runner' (Cloud Build SA) having the 
+      # 'serviceAccountTokenCreator' role on the 'Actor' (Step 2B).
+      TOKEN=$(gcloud auth print-access-token")
+      
+      if; then
+        echo "ERROR: Failed to get token."
+        exit 1
+      fi
+      
+      # 3. Construct the JSON payload
+      # This payload is the core of the request, telling the API to use the
+      # 'releaseConfig' as the source for the new compilation.
+      # Note: Quotes are escaped for the inline bash variable.
+      JSON_PAYLOAD="{\"releaseConfig\": \"${RELEASE_CONFIG_RESOURCE}\"}"
+      
+      # 4. Call the Dataform API using curl with the Bearer token
+      # We explicitly set Content-Type and pass the payload.[14, 16]
+      curl -X POST "${API_ENDPOINT}" \
+        -H "Authorization: Bearer ${TOKEN}" \
+        -H "Content-Type: application/json" \
+        -d "${JSON_PAYLOAD}"
+        
+      echo "Dataform compilation successfully triggered."
+
+# Substitution variables are provided by the trigger created in Step 3.
+# Default values are shown here for clarity.
+substitutions:
+  _DATAFORM_PROJECT_ID: 'default-value'
+  _DATAFORM_REGION: 'default-value'
+  _DATAFORM_REPO_ID: 'default-value'
+  _RELEASE_CONFIG_ID: 'default-value'
+
+options:
+  logging: CLOUD_LOGGING_ONLY
