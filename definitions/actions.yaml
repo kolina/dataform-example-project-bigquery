@@ -1,0 +1,3 @@
+actions:
+  - notebook:
+      filename: notebook.ipynb
