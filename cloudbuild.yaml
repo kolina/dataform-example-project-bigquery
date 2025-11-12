@@ -23,7 +23,7 @@ steps:
           "$$COMPILATION_RESULTS_API" > /workspace/compilation_response.json
 
   - name: 'alpine'
-    entrypoint: 'bash'
+    entrypoint: 'sh'
     args:
       - '-c'
       - |
