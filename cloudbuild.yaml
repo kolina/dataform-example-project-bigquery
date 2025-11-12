@@ -1,42 +1,52 @@
 steps:
-- name: 'gcr.io/cloud-builders/gcloud'
-  id: 'Create Dataform Compilation Result from Release Config'
-  entrypoint: 'bash'
-  args:
-    - '-c'
-    - |
-      echo "Starting Dataform compilation trigger for Release Config: ${_RELEASE_CONFIG_ID}"
-      
-      # 1. Construct the full resource names
-      RELEASE_CONFIG_RESOURCE="projects/${_DATAFORM_PROJECT_ID}/locations/${_DATAFORM_REGION}/repositories/${_DATAFORM_REPO_ID}/releaseConfigs/${_RELEASE_CONFIG_ID}"
-      DATAFORM_PARENT="projects/${_DATAFORM_PROJECT_ID}/locations/${_DATAFORM_REGION}/repositories/${_DATAFORM_REPO_ID}"
-      API_ENDPOINT="https://dataform.googleapis.com/v1/$${DATAFORM_PARENT}/compilationResults"
-      
-      echo "Target API Endpoint: $${API_ENDPOINT}"
-      echo "Compiling from: $${RELEASE_CONFIG_RESOURCE}"
-
-      # 3. Construct the JSON payload
-      # This payload is the core of the request, telling the API to use the
-      # 'releaseConfig' as the source for the new compilation.
-      # Note: Quotes are escaped for the inline bash variable.
-      JSON_PAYLOAD="{\"releaseConfig\": \"$${RELEASE_CONFIG_RESOURCE}\"}"
-      
-      # 4. Call the Dataform API using curl with the Bearer token
-      # We explicitly set Content-Type and pass the payload.[14, 16]
-      curl -X POST "$${API_ENDPOINT}" \
-        -H "Authorization: Bearer $(gcloud auth print-access-token)" \
-        -H "Content-Type: application/json" \
-        -d "$${JSON_PAYLOAD}"
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:latest'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        set -e # Exit script on any error
         
-      echo "Dataform compilation successfully triggered."
+        # 1. Get the access token
+        TOKEN=$(gcloud auth print-access-token)
 
-# Substitution variables are provided by the trigger created in Step 3.
-# Default values are shown here for clarity.
+        # 2. Define API endpoints and resource names
+        RELEASE_CONFIG_RESOURCE="projects/${_PROJECT_ID}/locations/${_DATAFORM_LOCATION}/repositories/${_DATAFORM_REPO_ID}/releaseConfigs/${_RELEASE_CONFIG_ID}"
+        COMPILATION_RESULTS_API="https://dataform.googleapis.com/v1/projects/${_PROJECT_ID}/locations/${_DATAFORM_LOCATION}/repositories/${_DATAFORM_REPO_ID}/compilationResults"
+        RELEASE_CONFIG_PATCH_API="https://dataform.googleapis.com/v1/${RELEASE_CONFIG_RESOURCE}:patch"
+
+        # 3. Create the new compilation result
+        echo "Creating new compilation result from $$RELEASE_CONFIG_RESOURCE..."
+        CREATE_PAYLOAD="{\"releaseConfig\": \"$$RELEASE_CONFIG_RESOURCE\"}"
+        CREATE_RESPONSE=$(curl --fail-with-body -s -X POST \
+          -H "Authorization: Bearer $$TOKEN" \
+          -H "Content-Type: application/json" \
+          -d "$$CREATE_PAYLOAD" \
+          "$$COMPILATION_RESULTS_API")
+
+        # 4. Parse the response to get the new compilation result's name
+        COMPILATION_NAME=$(echo "$$CREATE_RESPONSE" | jq -r '.name')
+
+        echo "Successfully created compilation result: $$COMPILATION_NAME"
+
+        # 5. Update the releaseConfig to set the new compilation result as 'live'
+        echo "Updating release config to set $$COMPILATION_NAME as live..."
+        PATCH_PAYLOAD="{\"releaseCompilationResult\": \"$$COMPILATION_NAME\"}"
+        
+        curl -X PATCH \
+          -H "Authorization: Bearer $$TOKEN" \
+          -H "Content-Type: application/json" \
+          -d "$$PATCH_PAYLOAD" \
+          "$$RELEASE_CONFIG_PATCH_API?updateMask=releaseCompilationResult"
+          
+        echo "Successfully updated release config."
+
+# Define substitution variables that can be set in the trigger
 substitutions:
-  _DATAFORM_PROJECT_ID: 'default-value'
-  _DATAFORM_REGION: 'default-value'
-  _DATAFORM_REPO_ID: 'default-value'
-  _RELEASE_CONFIG_ID: 'default-value'
+  _DATAFORM_LOCATION: 'us-central1' # Default, change if needed
+  _DATAFORM_REPO_ID: ''          # Required: Set this in the trigger
+  _RELEASE_CONFIG_ID: ''         # Required: Set this in the trigger
+  _PROJECT_ID: ${PROJECT_ID}      # Automatically uses the build's Project ID
 
 options:
-  logging: CLOUD_LOGGING_ONLY
+  # Ensure the build step fails if any command returns a non-zero exit code
+  set_exit_code: true
