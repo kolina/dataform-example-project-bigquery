@@ -16,11 +16,12 @@ steps:
         # 3. Create the new compilation result
         echo "Creating new compilation result from $$RELEASE_CONFIG_RESOURCE..."
         CREATE_PAYLOAD="{\"releaseConfig\": \"$$RELEASE_CONFIG_RESOURCE\"}"
-        curl --fail-with-body -X POST \
+        RESPONSE_PAYLOAD=$(curl --fail-with-body -X POST \
           -H "Authorization: Bearer $$TOKEN" \
           -H "Content-Type: application/json" \
           -d "$$CREATE_PAYLOAD" \
-          "$$COMPILATION_RESULTS_API" | tee /workspace/compilation_response.json
+          "$$COMPILATION_RESULTS_API")
+        echo $$RESPONSE_PAYLOAD > /workspace/compilation_response.json
 
   - name: 'alpine'
     entrypoint: 'sh'
