@@ -20,7 +20,7 @@ steps:
           -H "Authorization: Bearer $$TOKEN" \
           -H "Content-Type: application/json" \
           -d "$$CREATE_PAYLOAD" \
-          "$$COMPILATION_RESULTS_API" > /workspace/compilation_response.json
+          "$$COMPILATION_RESULTS_API" | tee /workspace/compilation_response.json
 
   - name: 'alpine'
     entrypoint: 'sh'
