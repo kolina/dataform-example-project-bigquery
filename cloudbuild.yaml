@@ -46,7 +46,3 @@ substitutions:
   _DATAFORM_REPO_ID: ''          # Required: Set this in the trigger
   _RELEASE_CONFIG_ID: ''         # Required: Set this in the trigger
   _PROJECT_ID: ${PROJECT_ID}      # Automatically uses the build's Project ID
-
-options:
-  # Ensure the build step fails if any command returns a non-zero exit code
-  set_exit_code: true
