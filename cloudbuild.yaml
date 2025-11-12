@@ -45,7 +45,7 @@ steps:
         # 5. Update the releaseConfig to set the new compilation result as 'live'
         COMPILATION_NAME=$(cat /workspace/compilation_result_name.txt)
         echo "Updating release config to set $$COMPILATION_NAME as live..."
-        PATCH_PAYLOAD="{\"releaseCompilationResult\": \"$$COMPILATION_NAME\"}"
+        PATCH_PAYLOAD="{\"releaseCompilationResult\": \"$$COMPILATION_NAME\", \"gitCommitish\": \"$BRANCH_NAME\"}"
         
         RELEASE_CONFIG_RESOURCE="projects/${_PROJECT_ID}/locations/${_DATAFORM_LOCATION}/repositories/${_DATAFORM_REPO_ID}/releaseConfigs/${_RELEASE_CONFIG_ID}"
         RELEASE_CONFIG_PATCH_API="https://dataform.googleapis.com/v1/$${RELEASE_CONFIG_RESOURCE}"
