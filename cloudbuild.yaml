@@ -22,7 +22,7 @@ steps:
           -d "$$CREATE_PAYLOAD" \
           "$$COMPILATION_RESULTS_API" > /workspace/compilation_response.json
 
-  - name: 'ghcr.io/jqlang/jq'
+  - name: 'alpine'
     entrypoint: 'bash'
     args:
       - '-c'
@@ -30,6 +30,7 @@ steps:
         set -e # Exit script on any error
 
         # 4. Parse compilation result name
+        apk add --no-cache jq
         COMPILATION_NAME=$(jq -r '.name' < /workspace/compilation_response.json)
 
         echo "Successfully created compilation result: $$COMPILATION_NAME"
