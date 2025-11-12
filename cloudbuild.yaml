@@ -12,7 +12,7 @@ steps:
         # 2. Define API endpoints and resource names
         RELEASE_CONFIG_RESOURCE="projects/${_PROJECT_ID}/locations/${_DATAFORM_LOCATION}/repositories/${_DATAFORM_REPO_ID}/releaseConfigs/${_RELEASE_CONFIG_ID}"
         COMPILATION_RESULTS_API="https://dataform.googleapis.com/v1/projects/${_PROJECT_ID}/locations/${_DATAFORM_LOCATION}/repositories/${_DATAFORM_REPO_ID}/compilationResults"
-        RELEASE_CONFIG_PATCH_API="https://dataform.googleapis.com/v1/${RELEASE_CONFIG_RESOURCE}:patch"
+        RELEASE_CONFIG_PATCH_API="https://dataform.googleapis.com/v1/$${RELEASE_CONFIG_RESOURCE}:patch"
 
         # 3. Create the new compilation result
         echo "Creating new compilation result from $$RELEASE_CONFIG_RESOURCE..."
