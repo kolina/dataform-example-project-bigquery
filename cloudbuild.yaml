@@ -48,8 +48,8 @@ steps:
         PATCH_PAYLOAD="{\"releaseCompilationResult\": \"$$COMPILATION_NAME\"}"
         
         RELEASE_CONFIG_RESOURCE="projects/${_PROJECT_ID}/locations/${_DATAFORM_LOCATION}/repositories/${_DATAFORM_REPO_ID}/releaseConfigs/${_RELEASE_CONFIG_ID}"
-        RELEASE_CONFIG_PATCH_API="https://dataform.googleapis.com/v1/$${RELEASE_CONFIG_RESOURCE}:patch"
-        curl -X PATCH \
+        RELEASE_CONFIG_PATCH_API="https://dataform.googleapis.com/v1/$${RELEASE_CONFIG_RESOURCE}"
+        curl --fail-with-body -s -X PATCH \
           -H "Authorization: Bearer $(gcloud auth print-access-token)" \
           -H "Content-Type: application/json" \
           -d "$$PATCH_PAYLOAD" \
