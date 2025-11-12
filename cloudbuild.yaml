@@ -38,6 +38,9 @@ steps:
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:latest'
     entrypoint: 'bash'
     args:
+      - '-c'
+      - |
+        set -e # Exit script on any error
         # 5. Update the releaseConfig to set the new compilation result as 'live'
         COMPILATION_NAME=$(cat /workspace/compilation_result_name.txt)
         echo "Updating release config to set $$COMPILATION_NAME as live..."
