@@ -1,4 +1,4 @@
-dataformCoreVersion: 3.0.37
+dataformCoreVersion: a.b
 defaultProject: dataform-open-source
 defaultLocation: us
 defaultDataset: dataform_extreme_weather_programming_example
