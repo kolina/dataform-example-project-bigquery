@@ -1,0 +1,2 @@
+config { type: "view" }
+select * from `my-project.my-dataset.my-table`
